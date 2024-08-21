@@ -1,0 +1,1 @@
+/opt/homebrew/bin/gfortran -O3 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX13.3.sdk CMakeFiles/greenr2k.dir/greenr2k.F90.o -o greenr2k  -framework Accelerate -lm -ldl

@@ -1,0 +1,16 @@
+# for GCC Compiler
+if(NOT CMAKE_C_COMPILER)
+set(CMAKE_C_COMPILER "gcc" CACHE STRING "" FORCE)
+#set(CMAKE_C_FLAGS_RELEASE "-Wall -Wno-unknown-pragmas -Wformat -Werror=format-security" CACHE STRING "" FORCE)
+endif(NOT CMAKE_C_COMPILER)
+if(NOT CMAKE_Fortran_COMPILER)
+  set(CMAKE_Fortran_COMPILER "gfortran" CACHE STRING "" FORCE)
+endif(NOT CMAKE_Fortran_COMPILER)
+
+if(USE_SCALAPACK)
+  if(SCALAPACK_LIBRARIES MATCHES "")
+    set(SCALAPACK_LIBRARIES "-lscalapack -lgfortran")
+  endif(SCALAPACK_LIBRARIES MATCHES "")
+
+  message(STATUS "SCALAPACK_LIBRARIES is ${SCALAPACK_LIBRARIES}")
+endif(USE_SCALAPACK)

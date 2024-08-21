@@ -1,0 +1,40 @@
+All                                                [0000]     10.63545
+  sz                                               [1000]      0.00049
+  diagonalcalc                                     [2000]      0.03900
+  CalcByLanczos                                    [4000]     10.59107
+    LanczosEigenValue                              [4100]      4.74800
+      mltply      in LanczosEigenValue             [4101]      4.69773
+      vec12       in LanczosEigenValue             [4102]      0.00366
+      DSEVvalue   in LanczosEigenValue             [4103]      0.01370
+    LanczosEigenVector                             [4200]      5.50661
+      mltply      in LanczosEigenVector            [4201]      5.48437
+    expec_energy_flct                              [4300]      0.05190
+      calc flctuation in expec_energy_flct         [4301]      0.00028
+      mltply in expec_energy_flct                  [4302]      0.05071
+    CGEigenVector                                  [4400]      0.00000
+      mltply in CGEigenVector                      [4401]      0.00000
+    expec_onebody                                  [4500]      0.00792
+    expec_twobody                                  [4600]      0.27421
+    expec_TotalSz                                  [4700]      0.00000
+    FileIO                                         [4800]      0.00000
+      Read Input Eigenvec                          [4801]      0.00000
+================================================
+All mltply                                         [0001]     10.23270
+  diagonal                                         [0100]      0.01747
+  SpinGC                                           [0500]     10.21484
+    trans    in SpinGC                             [0510]      0.00001
+      double                                       [0511]      0.00000
+      inner                                        [0512]      0.00000
+    interall in SpinGC                             [0520]     10.21479
+      double                                       [0521]      0.00000
+      single                                       [0522]      0.00000
+      inner                                        [0523]     10.21236
+    exchange in SpinGC                             [0530]      0.00001
+      double                                       [0531]      0.00000
+      single                                       [0532]      0.00000
+      inner                                        [0533]      0.00000
+    pairlift in SpinGC                             [0540]      0.00001
+      double                                       [0541]      0.00000
+      single                                       [0542]      0.00000
+      inner                                        [0543]      0.00000
+================================================
