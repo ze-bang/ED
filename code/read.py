@@ -13,8 +13,8 @@ basis = np.array([[0,1,1],[1,0,1],[1,1,0]])/2
 BasisBZA = np.array([2*np.pi*np.array([-1,1,1]),2*np.pi*np.array([1,-1,1]),2*np.pi*np.array([1,1,-1])])
 
 dim1 = 1
-dim2 = 2
-dim3 = 2
+dim2 = 1
+dim3 = 1
 
 coord = np.zeros((dim1*dim2*dim3*4,3))
 
