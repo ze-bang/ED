@@ -1,4 +1,0 @@
-# The fortran modules provided by this target.
-provides
- fourier_routine.mod
- fourier_val.mod

@@ -1,9 +1,0 @@
-# The fortran modules provided by this target.
-provides
- komega_bicg.mod
- komega_math.mod
- komega_parameter.mod
- komega_vals_c.mod
- komega_vals_r.mod
- komega_vecs_c.mod
- komega_vecs_r.mod
