@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from opt_einsum import contract
+import sys
 
 z = np.array([[1,1,1],[1,-1,-1],[-1,1,-1], [-1,-1,1]])/np.sqrt(3)
 y = np.array([[0,-1,1],[0,1,-1],[0,-1,-1], [0,1,1]])/np.sqrt(2)
@@ -13,8 +14,8 @@ basis = np.array([[0,1,1],[1,0,1],[1,1,0]])/2
 BasisBZA = np.array([2*np.pi*np.array([-1,1,1]),2*np.pi*np.array([1,-1,1]),2*np.pi*np.array([1,1,-1])])
 
 dim1 = 1
-dim2 = 2
-dim3 = 2
+dim2 = 1
+dim3 = 1
 
 coord = np.zeros((dim1*dim2*dim3*4,3))
 
@@ -28,10 +29,29 @@ for i in range(dim1):
 def readTwoBody(filename):
     f = open(filename, 'r')
 
-twobody = np.loadtxt("output/zvo_cisajscktalt.dat", dtype=np.float64)
-onebody = np.loadtxt("output/zvo_cisajs.dat", dtype=np.float64)
+dir = sys.argv[1]
+
+twobody = np.loadtxt(dir+"/output/zvo_cisajscktalt_eigen0.dat", dtype=np.float64)
+onebody = np.loadtxt(dir+"/output/zvo_cisajs_eigen0.dat", dtype=np.float64)
 # ind = np.array([1,3,5,7], dtype=int)
 # spin_info = f[:,ind]
+
+def gSF(q, v):
+    M = np.zeros((len(q),4,4))
+    a = np.cross(q, v)
+    a = contract('ia, i->ia', a, 1/np.linalg.norm(a, axis=1))
+    for i in range(4):
+        for j in range(4):
+            M[:,i,j] = contract('a, ka, b, kb->k',z[i], a, z[j], a)
+    return M
+
+def gNSF(q, v):
+    M = np.zeros((4,4))
+    for i in range(4):
+        for j in range(4):
+            M[i,j] = contract('a,a, b, b->',z[i], v, z[j], v)
+    M = contract('k ,ab->kab', np.ones(len(q)), M)
+    return M
 
 def proj(k):
     delta = contract('ar, br->ab', z, z)
@@ -163,6 +183,35 @@ def Szz_global(k, f):
     ffact = np.exp(1j*contract('ik, nk->in', k, here_coord_1-here_coord_2))
 
     return np.real(contract('n,in, in->i', Szz, ffact, realProj))
+
+def Szz_NSF(k, f, v):
+    indpos = np.concatenate((np.arange(0, len(f), 8), np.arange(3, len(f), 8)))
+    indneg = np.concatenate((np.arange(1, len(f), 8), np.arange(2, len(f), 8)))
+    CupCup = f[indpos,8] + 1j * f[indpos,9]
+    CupCdown = f[indneg,8] + 1j * f[indneg,9]
+
+    Szz = (CupCup - CupCdown)/4
+
+    ind_pos_1 = np.array(f[indpos,0], dtype=int)
+    ind_pos_2 = np.array(f[indpos,4], dtype=int)
+
+    P = gNSF(k, v)
+    sublat_ind_1 = np.mod(ind_pos_1, 4)
+    sublat_ind_2 = np.mod(ind_pos_2, 4)
+
+    realProj = np.zeros((len(k),len(sublat_ind_1)))
+
+    for i in range(len(sublat_ind_1)):
+        realProj[:,i] = P[:,sublat_ind_1[i], sublat_ind_2[i]]
+
+    here_coord_1 = coord[ind_pos_1]
+    here_coord_2 = coord[ind_pos_2]
+
+    ffact = np.exp(1j*contract('ik, nk->in', k, here_coord_1-here_coord_2))
+
+    return np.real(contract('n,in, in->i', Szz, ffact, realProj))
+
+
 def Spm_global(k, f,proj_method):
     indpos = np.arange(5, len(f), 8)
     Spm_Smp = f[indpos,8] + 1j * f[indpos,9]
@@ -265,28 +314,71 @@ def hhltoK(H, L):
     return np.einsum('ij,k->ijk',H, 2*np.array([np.pi,np.pi,0])) \
         + np.einsum('ij,k->ijk',L, 2*np.array([0.,0.,np.pi]))
 
-Hr = 2.5
-Lr = 2.5
+def hk2ktoK(H, L):
+    return np.einsum('ij,k->ijk',H, 2*np.array([np.pi,-np.pi,0])) \
+        + np.einsum('ij,k->ijk',L, 2*np.array([np.pi,np.pi,-2*np.pi]))
+
+
+def genHHLK(Hr, Lr, nK):
+    H = np.linspace(-Hr, Hr, nK)
+    L = np.linspace(-Lr, Lr, nK)
+    A, B = np.meshgrid(H, L)
+    return hhltoK(A, B).reshape((nK * nK, 3))
+def genHnH2KK(Hr, Lr, nK):
+    H = np.linspace(-Hr, Hr, nK)
+    L = np.linspace(-Lr, Lr, nK)
+    A, B = np.meshgrid(H, L)
+    return hk2ktoK(A, B).reshape((nK * nK, 3))
+
+
 nK = 100
-H = np.linspace(-Hr, Hr, nK)
-L = np.linspace(-Lr, Lr, nK)
-A, B = np.meshgrid(H, L)
 
+if sys.argv[2] == "111":
+    Hr = 3
+    Lr = 3
+    K = genHnH2KK(Hr, Lr, nK)
+else:
+    Hr = 2.5
+    Lr = 2.5
+    K = genHHLK(Hr, Lr, nK)
 
-K = hhltoK(A, B).reshape((nK * nK, 3))
 
 SSSF = Szz(K, twobody)
 
 SSSF = SSSF.reshape((nK,nK))
 
-C = plt.imshow(SSSF)
-plt.colorbar(C)
-plt.show()
+C = plt.imshow(SSSF, interpolation="lanczos", origin='lower', extent=[-Hr, Hr, -Lr, Lr], aspect='equal')
+# plt.colorbar(C)
+# plt.ylabel(r'$(0,0,L)$')
+# plt.xlabel(r'$(H,H,0)$')
+plt.xlim([-Hr, Hr])
+plt.ylim([-Lr, Lr])
+plt.savefig(dir+"/Szz.png")
+plt.clf()
 
-SSSF =  Szz_global(K, twobody)
+SSSF = Szz_global(K, twobody)
 
 SSSF = SSSF.reshape((nK,nK))
 
-C = plt.imshow(SSSF)
+C = plt.imshow(SSSF, interpolation="lanczos", origin='lower', extent=[-Hr, Hr, -Lr, Lr], aspect='equal')
+# plt.colorbar(C)
+# plt.ylabel(r'$(K,K,-2K)$')
+# plt.xlabel(r'$(H,-H,0)$')
+plt.xlim([-Hr, Hr])
+plt.ylim([-Lr, Lr])
+plt.savefig(dir+"/Szz_global.png")
+plt.clf()
+
+
+SSSF = Szz_NSF(K, twobody, np.array([1,-1,0])/np.sqrt(2))
+
+SSSF = SSSF.reshape((nK,nK))
+
+C = plt.imshow(SSSF, interpolation="lanczos", origin='lower', extent=[-Hr, Hr, -Lr, Lr], aspect='equal')
 plt.colorbar(C)
-plt.show()
+# plt.ylabel(r'$(K,K,-2K)$')
+# plt.xlabel(r'$(H,-H,0)$')
+plt.xlim([-Hr, Hr])
+plt.ylim([-Lr, Lr])
+plt.savefig(dir+"/Szz_NSF.png")
+plt.clf()
