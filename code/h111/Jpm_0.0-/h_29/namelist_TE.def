@@ -1,0 +1,9 @@
+  ModPara       modpara.def
+  CalcMod       calcmod_TE.def
+  LocSpin       locspn.def
+  Trans         Trans.def
+  InterAll      InterAll.def
+  OneBodyG      greenone.def
+  TwoBodyG      greentwo.def
+  TEOneBody      greenone_TE.def
+  TETwoBody      greentwo_TE.def
