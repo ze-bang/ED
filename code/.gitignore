@@ -1,0 +1,7 @@
+../__pycache__/*
+../.idea*
+../h110/*
+../h111/*
+../h001/*
+../output/*
+../script_venv/*
