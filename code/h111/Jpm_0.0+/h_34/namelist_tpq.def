@@ -1,7 +1,0 @@
-  ModPara       modpara.def
-  CalcMod       calcmod_tpq.def
-  LocSpin       locspn.def
-  Trans         Trans.def
-  InterAll      InterAll.def
-  OneBodyG      greenone.def
-  TwoBodyG      greentwo.def
